@@ -1,0 +1,108 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE
+The complete set of authors may be found at http://polymer.github.io/AUTHORS
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS
+-->
+<link rel="import" href="../paper-ripple/paper-ripple.html">
+<dom-module id="ink-icon-button">
+  <template><style>
+    :host {
+      display: inline-block;
+      text-align: center;
+      position: relative;
+      outline: none;
+      -webkit-tap-highlight-color: rgba(0,0,0,0);
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      cursor: pointer;
+      z-index: 0;
+      border: 0;
+      background: transparent;
+      width: 40px;
+      height: 40px;
+    }
+
+    paper-ripple {
+      opacity: 0.6;
+    }
+  </style></template>
+  <script>
+    Polymer({
+      is: 'ink-icon-button',
+      extends: 'button',
+
+      properties: {
+        icon: {
+          observer: '_iconChanged'
+        }
+      },
+
+      _initFeatures: function() {
+        this._pushHost();
+        this._stampTemplate();
+        this._popHost();
+        this._marshalInstanceEffects();
+        this._marshalAttributes();
+        this._ready();
+      },
+
+      _beforeClientsReady: function() {},
+      _afterClientsReady: function() {},
+      _readySelf: function() {
+        this._readied = true;
+      },
+      _beginDistribute: function() {},
+      _finishDistribute: function() {
+        if (this.shadyRoot) {
+          this.shadyRoot._distributionClean = true;
+        }
+      },
+
+      created: function() {
+        var boundActivateRipple = this._activateRipple.bind(this);
+        var boundDeactivateRipple = this._deactivateRipple.bind(this)
+        this._listen(this, 'down', boundActivateRipple);
+        this._listen(this, 'up', boundDeactivateRipple);
+        this.addEventListener('focus', boundActivateRipple);
+        this.addEventListener('blur', boundDeactivateRipple);
+      },
+
+      _takeAttributesToModel: function(model) {
+        if (this.hasAttribute('icon')) {
+          this.icon = this.getAttribute('icon');
+        }
+      },
+
+      _iconChanged: function(value) {
+        this.style.background = 'url(' + value + ') no-repeat center center';
+      },
+
+      _activateRipple: function(e) {
+        this.ensureRipple();
+        this.ripple.downAction(e);
+      },
+
+      _deactivateRipple: function(e) {
+        if (this.ripple) {
+          this.ripple.upAction(e);
+        }
+      },
+
+      ensureRipple: function() {
+        if (!this.ripple) {
+          this.ripple = document.createElement('paper-ripple');
+          this.ripple.setAttribute('center', '');
+          this.ripple.classList.add('circle');
+          Polymer.dom(this.root).appendChild(this.ripple);
+        }
+      }
+
+    });
+  </script>
+</dom-module>
